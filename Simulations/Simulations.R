@@ -9,22 +9,17 @@ source("MDD_function_Mair.R")
 #' 
 #'
 CreateSampleDataset <- function(effect) {
-  control <- rnorm(n=7, mean = 0, sd = 1)
-  treatment <- rnorm(n=7, mean = effect, sd = 1)
+  control <- rnorm(n=10, mean = 0, sd = 1)
+  treatment <- rnorm(n=10, mean = effect, sd = 1)
   data <- data.frame(treatment, control)
   return(data)
 }
- 
-#plot(data$control ~ data$treatment) 
 
 
-effect = rep(c(0,1), each = 500)
+effect = rep(c(0,0.5), each = 50)
 dataset = 1:length(effect)
 
 dataSets <- lapply(effect, CreateSampleDataset)
-
-# summary(dataSets[[1]])
-# boxplot(dataSets[[1]])
 
 simulations = expand.grid(method = c("MDD", "CI", "EQUIV", "BFRatio"), 
                           threshold = seq(0,2, len = 20), dataset = dataset)
@@ -38,12 +33,18 @@ str(simulations)
 
 alpha = 0.05
 
-for (i in 1:nrow(simulations)){
+
+library(parallel)
+
+cl <- makeCluster(3)
+clusterExport(cl, varlist = ls())
+clusterEvalQ(cl, {source("MDD_function_Mair.R")})
+
+results_sim=
+parLapply(cl, 1:nrow(simulations), function(i) {
   
   dat = dataSets[[simulations$dataset[i]]]
   N = nrow(dat)
-  
-  # boxplot(dat, main = simulations$trueEffect[i])
 
   test <- t.test(dat$treatment, dat$control, alternative = "greater", var.equal = T, alpha = alpha)
   simulations$effectDetected[i] <- test$p.value < 0.05
@@ -64,47 +65,12 @@ for (i in 1:nrow(simulations)){
   else if (simulations$method[i] == "CI") {
     
     test <- t.test(dat$treatment, dat$control, alternative = "less", var.equal = T)
-    
-    d = data.frame(res = c(dat$treatment, dat$control), x = rep(c("T", "C"), each = N))
-    
-    fit <- lm(res~x, data = d)
-    confint(fit)
-    confint(fit, "wt")
-    
-    
-    
-    #CI <- test$conf.int[2] # upper bound
-    
-    xMean =  mean(dat$treatment)-mean(dat$control)
- 
-    xSDvarUneq = sqrt(((N-1)*sd(dat$treatment) + (N-1) * sd(dat$control))/ (2 * N - 2))
- 
-    xSDvarEqual = sd(c(dat$control-mean(dat$control),dat$treatment-mean(dat$treatment)))
-    xSDLena = sqrt(var(c(dat$control-mean(dat$control),dat$treatment-mean(dat$treatment)))) 
-    
-    # Normal approximation CI <- xMean + 1.96 * xSDvarUneq *  sqrt(2/N) 
-    
-    CI <- xMean + qt(0.05, df = 2*N-2, lower.tail = FALSE) * xSDvarUneq * sqrt(2/N) 
-    
-    
-    
-    # how t.test()     #mean_ttest <- (1/2*N)*(sum(dat$trea
-tment) + sum(dat$control))
-    mean_ttest <- mean(dat$treatment)-mean(dat$control) 
-    lower_quantile <- qt(1-(0.05/2), df = 2*N-2, lower.tail = FALSE)
-    sd <- sd(c(dat$treatment,dat$control))
-    CI_ttest <- mean_ttest + lower_quantile * sd/sqrt(2*N)
-    
-    
-    #upperCI <- mean(dat$treatment)-mean(dat$control) + 
-    #qt(0.05/2, df = 2*N-2, lower.tail = FALSE) * sqrt(var(dat$control-mean(dat$control)))/sqrt(N) + sqrt(var(dat$treatment-mean(dat$treatment)))/sqrt(N)
-    
-  
+    CI <- test$conf.int[2] # upper bound
     simulations$noEffectTrusted[i] =  CI <= simulations$threshold[i]
   }
   else if (simulations$method[i] == "EQUIV") {
     
-    one_sided_test <- t.test(dat$treatment, dat$control, alternative = "less") 
+    one_sided_test <- t.test(dat$treatment, dat$control, alternative = "less", var.equal = T) 
     
     EQUIV <- one_sided_test$p.value
     
@@ -112,23 +78,25 @@ tment) + sum(dat$control))
   }
 else if (simulations$method[i] == "BFRatio") {
   library(BayesFactor)
-  bt <- ttestBF(dat$treatment, dat$control, nullInterval = c(Inf, 0))
+  bt <- ttestBF(dat$treatment, dat$control, nullInterval = c(Inf, 0), var.equal = T)
   BF <- extractBF(bt)
-  BFRatio <- log(BF$bf[1]/BF$bf[2])
-  
+  BFRatio <- log10(BF$bf[1]/BF$bf[2])
+  #thresholdBF = seq(1,3, len = 20)
   
   simulations$noEffectTrusted[i] =  BFRatio <= simulations$threshold[i]
 }
-}
-
+  return(simulations[i,])
+})
+simulations_results = do.call(rbind, results_sim)
+stopCluster(cl)
 
 detected = aggregate(effectDetected ~ method + threshold +  trueEffect, 
-                   data = simulations,
+                   data = simulations_results,
                    FUN = mean)
 
 
 result = aggregate(noEffectTrusted ~ method + threshold +  trueEffect + effectDetected, 
-                       data = simulations,
+                       data = simulations_results,
                        FUN = mean)
 
 
