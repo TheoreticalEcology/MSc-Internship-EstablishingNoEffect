@@ -54,8 +54,8 @@ getCI <- function(data, threshold = 0.1) {
   diff_means <- mean(data$treatment) - mean(data$control)
   sd_errorTR <- var(data$treatment)/sqrt(length(data$treatment))
   sd_errorCR <- var(data$control)/sqrt(length(data$control))
-  #CI<- diff_means + qt((1 - 0.05) / 2, df = 22 - 1) * sd_errorTR
-  # CI<- diff_means + qt((1 - 0.05) / 1, df = 2*length(data$treatment)-2) * sqrt(sd_errorTR)
+  CI<- diff_means + qt((1 - 0.05) / 2, df = 22 - 1) * sd_errorTR
+  CI<- diff_means + qt((1 - 0.05) / 1, df = 2*length(data$treatment)-2) * sqrt(sd_errorTR)
   # CI<- diff_means + qt(0.05/ 1, df = 2*length(data$treatment)-2) * sqrt(var(c(data$control-mean(data$control),data$treatment-mean(data$treatment)))) * sqrt(2/N)
   #if(CI<=threshold){
     #plot(CI )
