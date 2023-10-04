@@ -20,7 +20,7 @@ dataset = 1:length(effect)
 
 dataSets <- lapply(effect, CreateSampleDataset)
 
-simulations = expand.grid(method = c("MDD", "CI", "EQUIV", "BFRatio", "alpha_EQUIV"), 
+simulations = expand.grid(method = c("MDD", "CI", "EQUIV", "BFRatio", "Alpha"), 
                           threshold = seq(0,1, len = 15), dataset = dataset)
 
 simulations$trueEffect = effect[simulations$dataset]
@@ -93,13 +93,13 @@ results_sim =
       simulations$noEffectTrusted[i] =  BFRatio <= simulations$threshold[i]
     }
     
-    else if (simulations$method[i] == "alpha_EQUIV") {
+    else if (simulations$method[i] == "Alpha") {
       
       one_sided_test <- t.test(dat$treatment, dat$control, alternative = "less") 
       
       alpha_EQUIV <- one_sided_test$p.value
       
-      simulations$noEffectTrusted[i] =  alpha_EQUIV <= simulations$threshold[i]
+      simulations$noEffectTrusted[i] =  Alpha <= simulations$threshold[i]
       
     }
     else if (simulations$method[i] == "LLR") {
@@ -140,9 +140,9 @@ plotResult(method = "MDD")
 plotResult(method = "CI", col = "red") 
 plotResult(method = "EQUIV", col = "green") 
 plotResult(method = "BFRatio", col = "darkblue") 
-plotResult(method = "alpha_EQUIV", col = "purple")
+plotResult(method = "Alpha", col = "purple")
 plotResult(method = "LLR", col = "orange")
-legend("topright", legend=c("MDD", "CI", "EQUIV", "BFRatio", "alpha_EQUIV", "LLR"), col=c("lightblue","red","green","darkblue","purple", "orange"), lty=c(1,1,1,1), cex=0.4)
+legend("topright", legend=c("MDD", "CI", "EQUIV", "BFRatio", "Alpha", "LLR"), col=c("lightblue","red","green","darkblue","purple", "orange"), lty=c(1,1,1,1), cex=0.4)
 
 # falseTrust_CI <- result[result$method == 'CI' & result$effectDetected == F & result$trueEffect > 0, c(2,5)]
 # thresholds = maximum acceptable difference, try: ==alpha
