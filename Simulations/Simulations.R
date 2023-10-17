@@ -1,27 +1,26 @@
-source("MDD_function_Mair.R")
-
-#' Generates the dataset
+#' CreateSampleDataset Generates a data frame 
 #'
 #' @author Isabelle Halbhuber
 #' 
-#' @details This function generates a dataframe of two samples of continuous values: "treatment" and "control". 
+#' @details This function generates a data frame called "data" of two samples of continuous values: "treatment" and "control". The control group displays a mean of the value 0 and the treatment group displays a mean of the value of the effect. Both groups are normal distributed and and have the same standard deviation. Each group has 25 observations. 
 #' 
 #'
-CreateSampleDataset <- function(effect) {
-  control <- rnorm(n=25, mean = 0, sd = 1)
-  treatment <- rnorm(n=25, mean = effect, sd = 1)
+CreateSampleDataset <- function(effect, n = 25) {
+  control <- rnorm(n, mean = 0, sd = 1)
+  treatment <- rnorm(n, mean = effect, sd = 1)
   data <- data.frame(treatment, control)
   return(data)
 }
 
 
-effect = rep(c(0,0.75), each = 500)
+effect = rep(c(0,0.2), each = 50)
 dataset = 1:length(effect)
 
 dataSets <- lapply(effect, CreateSampleDataset)
 
-simulations = expand.grid(method = c("MDD", "CI", "EQUIV", "BFRatio", "Alpha"), 
-                          threshold = seq(0,1, len = 15), dataset = dataset)
+simulations = expand.grid(method = c("MDD", "CI", "EQUIV", "BFRatio", "random_values"), 
+                          threshold = seq(0,1, len = 10), dataset = dataset)# alternative: define threshold for each method separately -> less time complexity 
+
 
 simulations$trueEffect = effect[simulations$dataset]
 
@@ -36,7 +35,8 @@ library(BayesFactor)
 
 cl <- makeCluster(5)
 clusterExport(cl, varlist = list("simulations", "dataSets"))
-clusterEvalQ(cl, {source("MDD_function_Mair.R")})
+#clusterEvalQ(cl, {source("MDD_function_Mair.R")})
+
 
 results_sim =
   parLapply(cl, 1:nrow(simulations), function(i) {
@@ -48,36 +48,35 @@ results_sim =
     
     test <- t.test(dat$treatment, dat$control, alternative = "less", var.equal = T, alpha = alpha)
     simulations$effectDetected[i] <- test$p.value < 0.05
+    simulations$pvalue <- test$p.value
     
     if (simulations$method[i] == "MDD") {
       
-      #varSample = var(c(dat$treatment-mean(dat$treatment),dat$control-mean(dat$control)))
+      varSample = var(c(dat$treatment-mean(dat$treatment),dat$control-mean(dat$control)))
+      
       #MDDres <- MDD(N1 = N, 
-                   # N2 = N, 
-                   # variance1 = var(c(dat$treatment-mean(dat$treatment),dat$control-mean(dat$control))),
-                   # alpha = alpha, 
-                   # two.sided = F, 
-                   # var.equal = T)
-     # MDD <- MDDres$mdd
+                   #N2 = N,
+                   #variance1 = varSample,
+                   #alpha = alpha,
+                   #two.sided = F,
+                   #var.equal = T)
+     #MDD <- MDDres$mdd
       
       
       t.critical <- qt(0.05, df = 2*N-2, lower.tail = FALSE)
-      s <- sqrt(var(c(dat$treatment,dat$control))) # no residual standard deviation 
-      MDD <- (t.critical * s * sqrt(2/N))
-      
-      
-      
-      simulations$noEffectTrusted[i] =  MDD <= simulations$threshold[i]
+      MDD <- (t.critical * sqrt(varSample) * sqrt(2/N))
+
+      simulations$noEffectTrusted[i] =  MDD <= 2*simulations$threshold[i]
     }
     else if (simulations$method[i] == "CI") {
       
       test <- t.test(dat$treatment, dat$control, alternative = "less", var.equal = T)
       CI <- test$conf.int[2] # upper bound
-      simulations$noEffectTrusted[i] =  CI <= simulations$threshold[i]
+      simulations$noEffectTrusted[i] =  CI <= 2*simulations$threshold[i]
     }
     else if (simulations$method[i] == "EQUIV") {
       
-      one_sided_test <- t.test(dat$treatment - simulations$threshold[i], 
+      one_sided_test <- t.test(dat$treatment - 2*simulations$threshold[i], 
                                dat$control, alternative = "less", var.equal = T) 
       
       simulations$noEffectTrusted[i] =   one_sided_test$p.value <= 0.05
@@ -88,26 +87,25 @@ results_sim =
                                  rscale = "ultrawide" )
       BF <- BayesFactor::extractBF(bt)
       BFRatio <- log10(BF$bf[1]/BF$bf[2])
-      #thresholdBF = seq(1,3, len = 20)
-      
-      simulations$noEffectTrusted[i] =  BFRatio <= simulations$threshold[i]
+  
+      simulations$noEffectTrusted[i] =  BFRatio <= 10 * simulations$threshold[i]
     }
     
     else if (simulations$method[i] == "Alpha") {
       
-      one_sided_test <- t.test(dat$treatment, dat$control, alternative = "less") 
+      #one_sided_test <- t.test(dat$treatment, dat$control, alternative = "less") 
       
-      alpha_EQUIV <- one_sided_test$p.value
+      #Alpha <- one_sided_test$p.value
       
-      simulations$noEffectTrusted[i] =  Alpha <= simulations$threshold[i]
+      #simulations$noEffectTrusted[i] =  Alpha <= simulations$threshold[i]
       
     }
-    else if (simulations$method[i] == "LLR") {
+    else if (simulations$method[i] == "random_values") {
       
-      model1 <- lm(dat$treatment ~ dat$control, data = dat)
-      model2 <- lm(dat$treatment ~ dat$control + mean(dat$treatment), data = dat)
+      random_values = runif(20)
       
-      simulations$noEffectTrusted[i] =  LLR <= simulations$threshold[i]
+      
+      simulations$noEffectTrusted[i] =  random_values <= simulations$threshold[i]
     }
     return(simulations[i,])
   })
@@ -115,12 +113,13 @@ results_sim =
 simulations_results = do.call(rbind, results_sim)
 stopCluster(cl)
 
-detected = aggregate(effectDetected ~ method + threshold +  trueEffect, 
-                     data = simulations_results,
-                     FUN = mean)
+
+#detected = aggregate(effectDetected ~ method + threshold +  trueEffect, 
+                     #data = simulations_results,
+                     #FUN = mean)
 
 
-result = aggregate(noEffectTrusted ~ method + threshold +  trueEffect + effectDetected, 
+result = aggregate(noEffectTrusted ~ method + threshold +  trueEffect + effectDetected,
                    data = simulations_results,
                    FUN = mean)
 
@@ -129,7 +128,7 @@ plotResult <- function(method = "MDD", col = "lightblue") {
   falseTrust <- result[result$method == method & result$effectDetected == F & result$trueEffect > 0, c(2, 5)]
   trueTrust <- result[result$method == method & result$effectDetected == F & result$trueEffect == 0, c(2, 5)]
   lines(falseTrust$noEffectTrusted, 1-trueTrust$noEffectTrusted, type = "b", col = col)
-  text(falseTrust$noEffectTrusted - 0.1, 1-trueTrust$noEffectTrusted, labels = round(falseTrust$threshold, digits = 2), col = col)
+  text(falseTrust$noEffectTrusted - 0.1, 1-trueTrust$noEffectTrusted, labels = round(falseTrust$threshold, digits = 1), col = col, pos = 1)
 }
 
 plot(NULL, xlim = c(-0.1, 1), ylim = c(-0.05, 1), type = "l", xlab = "False trust rate ", 
@@ -140,9 +139,10 @@ plotResult(method = "MDD")
 plotResult(method = "CI", col = "red") 
 plotResult(method = "EQUIV", col = "green") 
 plotResult(method = "BFRatio", col = "darkblue") 
-plotResult(method = "Alpha", col = "purple")
-plotResult(method = "LLR", col = "orange")
-legend("topright", legend=c("MDD", "CI", "EQUIV", "BFRatio", "Alpha", "LLR"), col=c("lightblue","red","green","darkblue","purple", "orange"), lty=c(1,1,1,1), cex=0.4)
+plotResult(method = "random_values", col = "orange")
+#plotResult(method = "Alpha", col = "purple")
 
-# falseTrust_CI <- result[result$method == 'CI' & result$effectDetected == F & result$trueEffect > 0, c(2,5)]
-# thresholds = maximum acceptable difference, try: ==alpha
+legend("topright", legend=c("MDD", "CI", "EQUIV", "BFRatio", "Random"
+                            ), col=c("lightblue","red","green","darkblue","orange", "purple"), lty=c(1,1,1,1), cex=0.4)
+
+
