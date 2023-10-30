@@ -2,8 +2,10 @@ This repository provides all R code for
 
 Isabelle Halbhuber (2023) A comparison of statistical methods to establish no-effect.
 
-Additionally it contains the code from the Git repository 'https://github.com/TheoreticalEcology/Mair-et-al-2020' in the directory "Mair-et-al" from
-Mair, MM, Kattwinkel, M, Jakoby, O and Hartig, F (2020) The MDD concept for establishing trust in non-significant results - a critical review.
+Additionally it contains the R code for
+
+Mair, MM, Kattwinkel, M, Jakoby, O and Hartig, F (2020) The MDD concept for establishing trust in non-significant results - a critical review. The code is from the Git repository 'https://github.com/TheoreticalEcology/Mair-et-al-2020' in the directory "Mair-et-al/Mair-et-al-2020-master"
+and it contains code from Magdalena Mair received from Florian Hartig in the directory "Mair-et-al/Mair-NoEffectSimulations". 
 
 
 Abstract
