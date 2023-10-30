@@ -35,9 +35,6 @@ Function used from Git repository: The two scripts have the option to use the fu
 
 The source code file and more details about 'MDD_function_Mair.R' can be found in the Git repository 'https://github.com/TheoreticalEcology/Mair-et-al-2020'.
 
-References
-- [Git repository 'https://github.com/TheoreticalEcology/Mair-et-al-2020'](https://github.com/TheoreticalEcology/Mair-et-al-2020)
-
 Dependencies
 
 The script relies on the 'BayesFactor' library for Bayes Factor Ratio calculations.
