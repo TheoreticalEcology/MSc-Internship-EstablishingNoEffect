@@ -17,7 +17,7 @@ The R script for Hypothesis Testing and Trust Analysis:
 
 The R script "FMR_FTR_simulation" is designed to perform hypothesis testing and trust analysis for different statistical methods, including Minimum Detectable Difference (MDD), Confidence Interval (CI), Equivalence tests (EQUIV), Bayes Factor Ratio (BFRatio), and random value testing. It evaluates the trust in the "no effect" hypothesis using various statistical methods.
 
-The R script "sampleSize_simulation" is designed to perform hypothesis testing and trust analysis for MDD and EQUIV. It evaluates the trust in the "no effect" hypothesis using MDD or EQUIV for different data sets displaying different sample sizes. 
+The R script "sampleSize_simulation" is designed to perform hypothesis testing and trust analysis for MDD and EQUIV. It evaluates the trust in the "no effect" hypothesis using MDD and EQUIV for different data sets displaying different sample sizes. 
 
 
 Key components of the scripts include:
@@ -29,12 +29,9 @@ Hypothesis Testing: It performs hypothesis testing for each simulation setting, 
 Trust Analysis: The script calculates trust values for different methods and threshold levels and stores the results.
 Aggregate and Visualize: It aggregates the results and visualizes the trust in the "no effect" hypothesis for each method. The 'plotResult' function is used to create line graphs that display False Mistrust Rates (FMR) against False Trust Rates (FTR) or "No effect trusted" against "dataset".
 
-Usage
-To use the script, you can modify the parameters in the 'CreateSampleDataset' function and execute the subsequent simulations. You can also customize the visualization of trust results by calling the 'plotResult' function with different methods and colors.
+Usage: To use the script, you can modify the parameters in the 'CreateSampleDataset' function and execute the subsequent simulations. You can also customize the visualization of trust results by calling the 'plotResult' function with different methods and colors.
 
-Function used from Git repository
-
-The two scripts have the option to use the function 'MDD_function_Mair.R', which comes from an external Git repository. This function provides specific calculations needed in the context of this project.
+Function used from Git repository: The two scripts have the option to use the function 'MDD_function_Mair.R', which comes from an external Git repository. This function provides specific calculations needed in the context of this project.
 
 The source code file and more details about 'MDD_function_Mair.R' can be found in the Git repository 'https://github.com/TheoreticalEcology/Mair-et-al-2020'.
 
@@ -42,6 +39,7 @@ References
 - [Git repository 'repo-name'](https://github.com/TheoreticalEcology/Mair-et-al-2020)
 
 Dependencies
+
 The script relies on the 'BayesFactor' library for Bayes Factor Ratio calculations.
 R Version 2023.06.2+561 (2023.06.2+561)
 
