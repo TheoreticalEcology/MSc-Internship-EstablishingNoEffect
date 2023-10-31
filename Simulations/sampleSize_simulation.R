@@ -1,4 +1,4 @@
-#' CreateSampleDataset - Generates a Data Frame of Two Sample Groups
+#' CreateSampleDataset - Generates a data frame of two sample groups
 #'
 #' @author Isabelle Halbhuber
 #' 

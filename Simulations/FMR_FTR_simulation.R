@@ -1,4 +1,4 @@
-#' CreateSampleDataset - Generates a Data Frame of Two Sample Groups
+#' CreateSampleDataset - Generates a data frame of two sample groups
 #'
 #' @author Isabelle Halbhuber
 #' 
@@ -121,7 +121,7 @@ result = aggregate(noEffectTrusted ~ method + threshold +  trueEffect + effectDe
                    data = simulations_results,
                    FUN = mean)
 
-#' plotResult - Visualize trust in the "no-effect"
+#' plotResult - Visualize trust in the "no effect"
 #'
 #' @author Isabelle Halbhuber
 #' 
@@ -129,12 +129,6 @@ result = aggregate(noEffectTrusted ~ method + threshold +  trueEffect + effectDe
 #' @param col The color to use for the plotted line (default: "lightblue").
 #'
 #' @details This function plots the trust in the "no effect" hypothesis for a given statistical method and color. It takes the method and color as input, retrieves relevant data from the 'result' data frame, and plots a line graph to visualize the FMR against the FTR. The function also labels the graph with threshold values.
-#'
-#' @examples
-#' plotResult("MDD", "lightblue")
-#'
-#' @param method The statistical method to visualize trust for (default: "MDD").
-#' @param col The color to use for the plotted line (default: "lightblue").
 #'
 #' @return No explicit return value; it plots a graph.
 #'
