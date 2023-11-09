@@ -24,7 +24,7 @@ dataset = 1:length(effect) # Create a dataset vector from 1 to the length of the
 dataSets <- lapply(effect, CreateSampleDataset) # Generate a list of datasets using the 'CreateSampleDataset' function
 
 simulations = expand.grid(method = c("MDD", "CI", "EQUIV", "BFRatio", "random_values", "Alpha"), 
-                          threshold = seq(0,1, len = 10), dataset = dataset) # Create a grid of simulation settings 
+                          threshold = seq(0,10, len = 100), dataset = dataset) # Create a grid of simulation settings 
 # Alternative: define threshold for each method separately -> less time complexity 
 
 
@@ -79,12 +79,12 @@ results_sim =
       
       test <- t.test(dat$treatment, dat$control, alternative = "less", var.equal = T)
       CI <- test$conf.int[2] # upper bound
-      simulations$noEffectTrusted[i] =  CI <= 2*simulations$threshold[i]
+      simulations$noEffectTrusted[i] =  CI <= simulations$threshold[i]
     }
     else if (simulations$method[i] == "EQUIV") {
       # Check equivalence using a one-sided test
       
-      one_sided_test <- t.test(dat$treatment - 2*simulations$threshold[i], 
+      one_sided_test <- t.test(dat$treatment - (simulations$threshold[i]), 
                                dat$control, alternative = "less", var.equal = T) 
       
       simulations$noEffectTrusted[i] =   one_sided_test$p.value <= 0.05
@@ -98,7 +98,7 @@ results_sim =
       BF <- BayesFactor::extractBF(bt)
       BFRatio <- log10(BF$bf[1]/BF$bf[2])
   
-      simulations$noEffectTrusted[i] =  BFRatio <= 10 * simulations$threshold[i]
+      simulations$noEffectTrusted[i] =  BFRatio <=  simulations$threshold[i]
     }
     
     else if (simulations$method[i] == "random_values") {
