@@ -40,7 +40,7 @@ for (i in 1:num_simulations) {
 ###    dat <- dataSets[[simulations$dataset[j]]] # Retrieve the current dataset from 'dataSets' based on the dataset index.
 ###    mean_diff <- mean(dat$treatment) - mean(dat$control) # Calculate the mean difference between 'treatment' and 'control' groups.
 ###    mean_differences[j] <- mean_diff # Store the mean difference in the 'mean_differences' vector.
-  }
+###}
   
 ### average_mean_difference <- mean(mean_differences) # Calculate the average mean difference across all datasets.
 ### LSD = qt(0.05, df = 2*(nrow(dat))-2, lower.tail = FALSE) * 1 * sqrt((1/nrow(dat)) + (1/nrow(dat))) # Calculate the Least Significant Difference (LSD) for the specified confidence level (0.05). The LSD is used to determine a threshold for hypothesis testing.
@@ -106,6 +106,6 @@ falseTrust_equiv <- grouped_results[grouped_results$method == "EQUIV" & grouped_
 plot(falseTrust_equiv$dataset_name, falseTrust_equiv$noEffectTrusted, xlim = c(2, 70), ylim = c(0,1), type = "l", col = "darkblue", xlab = "Sample size",main = "Equivalence test", ylab = "False Trust Rate", bty = "l", las = 1, cex.lab = 1.5, cex.axis = 1.5, lwd = 2, pch=19)
 
 # Plot a graph for the "MDD" method's 'noEffectTrusted' values against 'dataset'.
-plot(falseTrust_mdd$dataset, falseTrust_mdd$noEffectTrusted, xlim = c(2, 70), ylim = c(0, 1), type = "l", col = "darkblue", xlab = "Sample size", ylab = "False Trust Rate",main = "MDD", bty = "l", las = 1, cex.lab = 1.5, cex.axis = 1.5, lwd = 2, pch=19)
+plot(falseTrust_mdd$dataset_name, falseTrust_mdd$noEffectTrusted, xlim = c(2, 70), ylim = c(0, 1), type = "l", col = "darkblue", xlab = "Sample size", ylab = "False Trust Rate",main = "MDD", bty = "l", las = 1, cex.lab = 1.5, cex.axis = 1.5, lwd = 2, pch=19)
 
 
