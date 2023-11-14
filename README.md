@@ -6,10 +6,9 @@ Additionally it contains the R code for
 
 Mair, MM, Kattwinkel, M, Jakoby, O and Hartig, F (2020) The MDD concept for establishing trust in non-significant results - a critical review. The code is from the GitHub repository 'https://github.com/TheoreticalEcology/Mair-et-al-2020' and you can find it in the directory "Mair-et-al/Mair-et-al-2020-master".
 
-Moreover the repository contains the R code
+The repository also contains the R code
 
-from Magdalena Mair received from Florian Hartig and you can find it in the directory "Mair-et-al/Mair-NoEffectSimulations". 
-
+by Magdalena Mair from Florian Hartig and can be found in the directory "Mair-et-al/Mair-NoEffectSimulations". 
 
 Abstract
 
