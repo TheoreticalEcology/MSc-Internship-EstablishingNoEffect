@@ -8,7 +8,7 @@ Mair, MM, Kattwinkel, M, Jakoby, O and Hartig, F (2020) The MDD concept for esta
 
 The repository also contains the R code
 
-by Magdalena Mair from Florian Hartig and can be found in the directory "Mair-et-al/Mair-NoEffectSimulations". 
+by Magdalena Mair (received from Florian Hartig) and can be found in the directory "Mair-et-al/Mair-NoEffectSimulations". 
 
 Abstract
 
